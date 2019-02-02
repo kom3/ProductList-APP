@@ -10,6 +10,43 @@ class ProductCard extends StatelessWidget {
 
   ProductCard(this.product, this.productIndex);
 
+  Widget _buildTitlePriceRow() {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 10.0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TitleDefault(product['title']),
+          SizedBox(
+            width: 8.0,
+          ),
+          PriceTag(product['price'].toString())
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context) {
+    return ButtonBar(
+      alignment: MainAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.info),
+          color: Theme.of(context).primaryColor,
+          onPressed: () => Navigator.pushNamed(
+              context, '/product/' + productIndex.toString()),
+        ),
+        IconButton(
+          icon: Icon(Icons.favorite_border),
+          color: Colors.red,
+          onPressed: () => {},
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -17,39 +54,9 @@ class ProductCard extends StatelessWidget {
         children: <Widget>[
           Image.asset(product['image']),
           // SizedBox(height: 10.0,),
-          Container(
-              padding: EdgeInsets.only(
-                top: 10.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TitleDefault(product['title']),
-                  SizedBox(
-                    width: 8.0,
-                  ),
-                  PriceTag(product['price'].toString())
-                ],
-              )),
+          _buildTitlePriceRow(),
           AddressTag('Surakarta, Central Java, Indonesia'),
-          ButtonBar(
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.info),
-                color: Theme.of(context).primaryColor,
-                onPressed: () => Navigator.pushNamed(
-                    context, '/product/' + productIndex.toString()),
-              ),
-              IconButton(
-                icon: Icon(Icons.favorite_border),
-                color: Colors.red,
-                onPressed: () => {
-
-                },
-              )
-            ],
-          )
+          _buildActionButton(context),
         ],
       ),
     );
