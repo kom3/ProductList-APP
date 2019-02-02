@@ -102,7 +102,6 @@ class _AuthPageState extends State<AuthPage> {
                   _buildPasswordTextField(),
                   _buildAcceptSwitch(),
                   RaisedButton(
-                    color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
                     child: Text(
                       'Login',
