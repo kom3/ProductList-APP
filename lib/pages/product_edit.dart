@@ -1,5 +1,7 @@
 import 'package:first_app/models/product.dart';
+import 'package:first_app/scoped-models/products.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/helpers/ensure_visible.dart';
 
@@ -103,6 +105,18 @@ class _ProductEditPage extends State<ProductEditPage> {
     );
   }
 
+  Widget _buildSubmitButton() {
+    return ScopedModelDescendant<ProductsModel>(
+      builder: (BuildContext context, Widget child, ProductsModel model) {
+        return RaisedButton(
+          textColor: Colors.white,
+          child: Text('Save'),
+          onPressed: () => _submitForm(model.addProduct, model.updateProduct),
+        );
+      },
+    );
+  }
+
   Widget _widgetBuildPageContent(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
@@ -122,11 +136,7 @@ class _ProductEditPage extends State<ProductEditPage> {
               _buildTitleTextDield(),
               _buildDescriptionTextField(),
               _buildPriceTextField(),
-              RaisedButton(
-                textColor: Colors.white,
-                child: Text('Save'),
-                onPressed: _submitForm,
-              ),
+              _buildSubmitButton(),
               // GestureDetector(
               //   onTap: _submitForm,
               //   child: Container(
@@ -142,7 +152,7 @@ class _ProductEditPage extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm(Function addProduct, Function updateProduct) {
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -155,9 +165,9 @@ class _ProductEditPage extends State<ProductEditPage> {
         price: _formData['price']);
 
     if (widget.product == null) {
-      widget.addProduct(newProduct);
+      addProduct(newProduct);
     } else {
-      widget.updateProduct(widget.productIndex, newProduct);
+      updateProduct(widget.productIndex, newProduct);
     }
     Navigator.pushReplacementNamed(context, '/products');
   }
