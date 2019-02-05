@@ -20,9 +20,10 @@ class _ProductsPageState extends State<ProductsPage> {
   @override
   initState() {
     widget.model.fetchProducts();
-    
+
     super.initState();
   }
+
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
       child: Column(
@@ -43,6 +44,25 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
+  Widget _buildProductsList() {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        Widget content = Center(
+          child: Text('No Products Found!'),
+        );
+        if (model.displayedProducts.length > 0 && !model.isLoading) {
+          content = Products();
+        } else if (model.isLoading) {
+          content = Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return content;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +74,9 @@ class _ProductsPageState extends State<ProductsPage> {
             builder: (BuildContext context, Widget child, MainModel model) {
               return IconButton(
                 icon: Icon(
-                  model.displayFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+                  model.displayFavoritesOnly
+                      ? Icons.favorite
+                      : Icons.favorite_border,
                 ),
                 onPressed: () {
                   model.toggleDisplayMode();
@@ -64,7 +86,7 @@ class _ProductsPageState extends State<ProductsPage> {
           )
         ],
       ),
-      body: Products(),
+      body: _buildProductsList(),
     );
   }
 }
