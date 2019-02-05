@@ -9,10 +9,15 @@ class Product {
 
   final bool isFavorite;
 
+  final String userEmail;
+  final String userId;
+
   Product(
       {@required this.title,
       @required this.description,
       @required this.image,
       @required this.price,
+      @required this.userEmail,
+      @required this.userId,
       this.isFavorite = false});
 }
