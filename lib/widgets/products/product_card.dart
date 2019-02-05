@@ -6,7 +6,7 @@ import 'package:scoped_model/scoped_model.dart';
 import './price_tag.dart';
 import '../ui_elements/title_default.dart';
 import './address_tag.dart';
-import '../../scoped-models/products.dart';
+import '../../scoped-models/main.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -42,8 +42,8 @@ class ProductCard extends StatelessWidget {
           onPressed: () => Navigator.pushNamed(
               context, '/product/' + productIndex.toString()),
         ),
-        ScopedModelDescendant<ProductsModel>(
-          builder: (BuildContext context, Widget child, ProductsModel model) {
+        ScopedModelDescendant<MainModel>(
+          builder: (BuildContext context, Widget child, MainModel model) {
             return IconButton(
               icon: Icon(model.products[productIndex].isFavorite ? Icons.favorite : Icons.favorite_border),
               color: Colors.red,
