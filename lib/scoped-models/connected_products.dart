@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:first_app/models/product.dart';
 import 'package:first_app/models/user.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
@@ -10,20 +13,34 @@ mixin ConnectedProductsModel on Model {
 
   void addProduct(
       String title, String description, String image, double price) {
-    final Product newProduct = Product(
-        title: title,
-        description: description,
-        image: image,
-        price: price,
-        userEmail: _authenticatedUser.email,
-        userId: _authenticatedUser.id);
-    _products.add(newProduct);
-    notifyListeners();
+    final Map<String, dynamic> productData = {
+      'title': title,
+      'description': description,
+      'image':
+          'https://sallysbakingaddiction.com/wp-content/uploads/2017/06/chocolate-buttercream-recipe-2.jpg',
+      'price': price
+    };
+
+    http
+        .post('https://flutter-products-first-app.firebaseio.com/products.json',
+            body: json.encode(productData))
+        .then((http.Response response) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+      _products.add(newProduct);
+      notifyListeners();
+    });
   }
 }
 
 mixin ProductsModel on ConnectedProductsModel {
-
   bool _showFavorites = false;
 
   List<Product> get allProducts {
@@ -54,7 +71,8 @@ mixin ProductsModel on ConnectedProductsModel {
     return _products[_selfSelectedProductIndex];
   }
 
-  void updateProduct(String title, String description, String image, double price) {
+  void updateProduct(
+      String title, String description, String image, double price) {
     final Product updatedProduct = Product(
         title: title,
         description: description,
@@ -83,7 +101,7 @@ mixin ProductsModel on ConnectedProductsModel {
         isFavorite: newFavorite,
         userEmail: selectedProoduct.userEmail,
         userId: selectedProoduct.userId);
-    
+
     _products[_selfSelectedProductIndex] = updatedProduct;
     notifyListeners();
   }
