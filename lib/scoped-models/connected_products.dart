@@ -22,7 +22,7 @@ mixin ConnectedProductsModel on Model {
       'title': title,
       'description': description,
       'image':
-          'https://sallysbakingaddiction.com/wp-content/uploads/2017/06/chocolate-buttercream-recipe-2.jpg',
+          'https://www.ikea.com/ca/en/images/products/choklad-ljus-milk-chocolate-bar__0446760_PE596815_S4.JPG',
       'price': price,
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id
@@ -79,24 +79,54 @@ mixin ProductsModel on ConnectedProductsModel {
     return _products[_selfSelectedProductIndex];
   }
 
-  void updateProduct(
+  Future<Null> updateProduct(
       String title, String description, String image, double price) {
-    final Product updatedProduct = Product(
-        id: selectedProoduct.id,
-        title: title,
-        description: description,
-        image: image,
-        price: price,
-        userEmail: selectedProoduct.userEmail,
-        userId: selectedProoduct.userId);
-
-    _products[_selfSelectedProductIndex] = updatedProduct;
+    _isLoading = true;
     notifyListeners();
+    final Map<String, dynamic> updateData = {
+      'title': title,
+      'description': description,
+      'image':
+          'https://www.ikea.com/ca/en/images/products/choklad-ljus-milk-chocolate-bar__0446760_PE596815_S4.JPG',
+      'price': price,
+      'userEmail': selectedProoduct.userEmail,
+      'userId': selectedProoduct.userId
+    };
+    return http
+        .put(
+            'https://flutter-products-first-app.firebaseio.com/products/${selectedProoduct.id}.json',
+            body: json.encode(updateData))
+        .then((http.Response response) {
+      _isLoading = false;
+
+      final Product updatedProduct = Product(
+          id: selectedProoduct.id,
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: selectedProoduct.userEmail,
+          userId: selectedProoduct.userId);
+
+      _products[_selfSelectedProductIndex] = updatedProduct;
+      notifyListeners();
+    });
   }
 
   void deleteProduct() {
+    _isLoading = true;
+    final String deletedProductId = selectedProoduct.id;
     _products.removeAt(selectedProductIndex);
+    _selfSelectedProductIndex = null;
     notifyListeners();
+    http
+        .delete(
+            'https://flutter-products-first-app.firebaseio.com/products/${deletedProductId}.json')
+        .then((http.Response response) {
+      _isLoading = false;
+      
+      notifyListeners();
+    });
   }
 
   void fetchProducts() {
