@@ -28,8 +28,8 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: Brightness.light,
-          // primarySwatch: Colors.white,
-          primaryColor: Colors.white,
+          primarySwatch: Colors.blueGrey,
+          // primaryColor: Colors.white,
           accentColor: Colors.blueAccent,
           buttonColor: Colors.blueGrey,
         ),
