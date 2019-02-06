@@ -8,13 +8,13 @@ import 'package:first_app/models/user.dart';
 
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
-  int _selfSelectedProductIndex;
+  String _selfSelectedProductId;
 
   User _authenticatedUser;
 
   bool _isLoading = false;
 
-  Future<Null> addProduct(
+  Future<bool> addProduct(
       String title, String description, String image, double price) {
     _isLoading = true;
     notifyListeners();
@@ -32,7 +32,6 @@ mixin ConnectedProductsModel on Model {
         .post('https://flutter-products-first-app.firebaseio.com/products.json',
             body: json.encode(productData))
         .then((http.Response response) {
-      _isLoading = false;
       final Map<String, dynamic> responseData = json.decode(response.body);
       final Product newProduct = Product(
           id: responseData['name'],
@@ -44,6 +43,11 @@ mixin ConnectedProductsModel on Model {
           userId: _authenticatedUser.id);
       _products.add(newProduct);
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 }
@@ -63,23 +67,29 @@ mixin ProductsModel on ConnectedProductsModel {
     return List.from(_products);
   }
 
-  int get selectedProductIndex {
-    return _selfSelectedProductIndex;
+  String get selectedProductId {
+    return _selfSelectedProductId;
   }
 
   bool get displayFavoritesOnly {
     return _showFavorites;
   }
 
+  int get selectedProductIndex {
+    return _products
+        .indexWhere((Product product) => product.id == _selfSelectedProductId);
+  }
+
   Product get selectedProoduct {
-    if (_selfSelectedProductIndex == null) {
+    if (_selfSelectedProductId == null) {
       return null;
     }
 
-    return _products[_selfSelectedProductIndex];
+    return _products
+        .firstWhere((Product product) => product.id == _selfSelectedProductId);
   }
 
-  Future<Null> updateProduct(
+  Future<bool> updateProduct(
       String title, String description, String image, double price) {
     _isLoading = true;
     notifyListeners();
@@ -108,24 +118,34 @@ mixin ProductsModel on ConnectedProductsModel {
           userEmail: selectedProoduct.userEmail,
           userId: selectedProoduct.userId);
 
-      _products[_selfSelectedProductIndex] = updatedProduct;
+      _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
-  void deleteProduct() {
+  Future<bool> deleteProduct() {
     _isLoading = true;
     final String deletedProductId = selectedProoduct.id;
     _products.removeAt(selectedProductIndex);
-    _selfSelectedProductIndex = null;
+    _selfSelectedProductId = null;
     notifyListeners();
-    http
+    return http
         .delete(
-            'https://flutter-products-first-app.firebaseio.com/products/${deletedProductId}.json')
+            'https://flutter-products-first-app.firebaseio.com/products/$deletedProductId.json')
         .then((http.Response response) {
       _isLoading = false;
-      
+
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
@@ -134,7 +154,7 @@ mixin ProductsModel on ConnectedProductsModel {
     notifyListeners();
     return http
         .get('https://flutter-products-first-app.firebaseio.com/products.json')
-        .then((http.Response response) {
+        .then<Null>((http.Response response) {
       _isLoading = false;
       final List<Product> fetchedProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
@@ -156,6 +176,11 @@ mixin ProductsModel on ConnectedProductsModel {
       }
 
       notifyListeners();
+      _selfSelectedProductId = null;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return;
     });
   }
 
@@ -172,13 +197,13 @@ mixin ProductsModel on ConnectedProductsModel {
         userEmail: selectedProoduct.userEmail,
         userId: selectedProoduct.userId);
 
-    _products[_selfSelectedProductIndex] = updatedProduct;
+    _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
   }
 
-  void selectProduct(int index) {
-    _selfSelectedProductIndex = index;
-    if (index != null) {
+  void selectProduct(String productId) {
+    _selfSelectedProductId = productId;
+    if (_selfSelectedProductId != null) {
       notifyListeners();
     }
   }
