@@ -9,48 +9,8 @@ import 'package:first_app/models/user.dart';
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
   String _selfSelectedProductId;
-
   User _authenticatedUser;
-
   bool _isLoading = false;
-
-  Future<bool> addProduct(
-      String title, String description, String image, double price) async {
-    _isLoading = true;
-    notifyListeners();
-    final Map<String, dynamic> productData = {
-      'title': title,
-      'description': description,
-      'image':
-          'https://www.ikea.com/ca/en/images/products/choklad-ljus-milk-chocolate-bar__0446760_PE596815_S4.JPG',
-      'price': price,
-      'userEmail': _authenticatedUser.email,
-      'userId': _authenticatedUser.id
-    };
-
-    try {
-      final http.Response response = await http.post(
-          'https://flutter-products-first-app.firebaseio.com/products.json',
-          body: json.encode(productData));
-
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      final Product newProduct = Product(
-          id: responseData['name'],
-          title: title,
-          description: description,
-          image: image,
-          price: price,
-          userEmail: _authenticatedUser.email,
-          userId: _authenticatedUser.id);
-      _products.add(newProduct);
-      notifyListeners();
-      return true;
-    } catch (error) {
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
 }
 
 mixin ProductsModel on ConnectedProductsModel {
@@ -88,6 +48,44 @@ mixin ProductsModel on ConnectedProductsModel {
 
     return _products
         .firstWhere((Product product) => product.id == _selfSelectedProductId);
+  }
+
+  Future<bool> addProduct(
+      String title, String description, String image, double price) async {
+    _isLoading = true;
+    notifyListeners();
+    final Map<String, dynamic> productData = {
+      'title': title,
+      'description': description,
+      'image':
+          'https://www.ikea.com/ca/en/images/products/choklad-ljus-milk-chocolate-bar__0446760_PE596815_S4.JPG',
+      'price': price,
+      'userEmail': _authenticatedUser.email,
+      'userId': _authenticatedUser.id
+    };
+
+    try {
+      final http.Response response = await http.post(
+          'https://flutter-products-first-app.firebaseio.com/products.json',
+          body: json.encode(productData));
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+      _products.add(newProduct);
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<bool> updateProduct(
