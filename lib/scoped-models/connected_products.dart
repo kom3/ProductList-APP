@@ -288,6 +288,16 @@ mixin UserModel on ConnectedProductsModel {
       notifyListeners();
     }
   }
+
+  void logout() async {
+    _authenticatedUser = null;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // await prefs.clear();
+    await prefs.remove('token');
+    await prefs.remove('userEmail');
+    await prefs.remove('userId');
+  }
 }
 
 mixin UtilityModel on ConnectedProductsModel {
